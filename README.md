@@ -5,4 +5,4 @@ Glide your duck to avoid other ducks;
 single player for now, multiplayer later(or not :P);
 //
 //
-Work in progress.
+Work in progress.//not playable
