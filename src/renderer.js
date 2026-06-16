@@ -72,5 +72,19 @@ const renderer = {
         this.drawBackground(ctx, duck.x, duck.y);
         enemies.draw(ctx, duck.x, duck.y);
         this.drawDuck(ctx);
+        this.drawHUD(ctx);
+    },
+
+    drawHUD(ctx) {
+        const speed = Math.sqrt(duck.vx * duck.vx + duck.vy * duck.vy).toFixed(1);
+        const W = ctx.canvas.width;
+    
+        ctx.save();
+        ctx.imageSmoothingEnabled = false;
+        ctx.font = '16px monospace';
+        ctx.fillStyle = 'white';
+        ctx.textAlign = 'right';
+        ctx.fillText(`Speed: ${speed}`, W - 12, 24);
+        ctx.restore();
     }
 };

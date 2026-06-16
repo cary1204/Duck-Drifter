@@ -5,15 +5,14 @@ const duck = {
     vy: 0,
     angle: 0,        // visual
     heading: 0,      // vel angel
-    maxSpeed: 6,
-    accel: 0.18,     //logistic curve
-    turnRate: 0.025,  //low = overshoot
+    maxSpeed: 8,
+    accel: 0.12,     //logistic curve
+    turnRate: 0.02,  //low = overshoot
     drag: 0.995,
 
     update(mouse, canvas) {
         const cx = canvas.width / 2;
         const cy = canvas.height / 2;
-
         const dx = mouse.x - cx;
         const dy = mouse.y - cy;
         const targetAngle = Math.atan2(dy, dx);
@@ -56,4 +55,5 @@ const duck = {
       while (angleDiff < -Math.PI) angleDiff += Math.PI * 2;
       this.angle += angleDiff * 0.12;
     }
+    
 };
