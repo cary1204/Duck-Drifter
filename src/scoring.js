@@ -4,8 +4,11 @@ const scoring = {
     timer: 0,
     nearMissChain: 0,
     nearMissChainTimer: 0,
+    totalNearMisses: 0,
+    survivalFrames: 0, 
 
     update() {
+    this.survivalFrames++;
     this.timer++;
     if (this.timer >= 60) {
         this.timer = 0;
@@ -25,6 +28,7 @@ const scoring = {
     },
 
     nearMiss() {
+        this.totalNearMisses++;
         this.nearMissChain++;
         this.nearMissChainTimer = 120;
 
@@ -39,5 +43,7 @@ const scoring = {
         this.timer = 0;
         this.nearMissChain = 0;
         this.nearMissChainTimer = 0;
+        this.totalNearMisses = 0;
+        this.survivalFrames = 0;
     }
 };

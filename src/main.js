@@ -21,20 +21,30 @@ canvas.addEventListener('touchmove', e => {
 
 renderer.init();
 
+let dead = false;
+let deathProgress = 0;
+
 function loop() {
-    duck.update(mouse, canvas);
-    enemies.update(canvas);
-    const result = collision.check();
-    if (result) {
+    if (!dead) {
+        duck.update(mouse, canvas);
+        enemies.update(canvas);
+
+        const result = collision.check();
+        if (result) {
         if (result.type === 'hit') {
-            console.log('dead, score:', scoring.score);
+            dead = true;
         } else if (result.type === 'nearMiss') {
             scoring.nearMiss();
-            renderer.nearMissTimer = 100;
+            renderer.nearMissTimer = 90;
         }
+        }
+        scoring.update();
+    } else {
+        deathProgress = Math.min(1, deathProgress + 0.008);
     }
-    scoring.update();
+
     renderer.draw(ctx);
+    if (dead) renderer.drawDeath(ctx, deathProgress);
     requestAnimationFrame(loop);
 }
 

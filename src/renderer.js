@@ -77,33 +77,86 @@ const renderer = {
       this.drawHUD(ctx);
     },
 
-nearMissTimer: 0,
-drawHUD(ctx) {
-  const speed = Math.sqrt(duck.vx * duck.vx + duck.vy * duck.vy).toFixed(1);
-  const W = ctx.canvas.width;
+    drawDeath(ctx, progress) {
+      const W = ctx.canvas.width;
+      const H = ctx.canvas.height;
+      // vignete
+      const gradient = ctx.createRadialGradient(W/2, H/2, H * 0.05, W/2, H/2, H * 0.6);
+      
+      gradient.addColorStop(0, `rgba(0, 0, 0, 0)`);
+      gradient.addColorStop(0.6, `rgba(80, 0, 0, ${progress * 0.6})`);
+      gradient.addColorStop(1, `rgba(0, 0, 0, ${progress * 0.95})`);
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, W, H);
+    
+      if (progress > 0.4) {
+        const textAlpha = (progress - 0.4) / 0.6;
+        const secs = Math.floor(scoring.survivalFrames / 60);
+        const mins = Math.floor(secs / 60);
+        const timeStr = mins > 0 ? `${mins}m ${secs % 60}s` : `${secs}s`;
 
-  ctx.save();
-  ctx.font = '16px monospace';
-  ctx.fillStyle = 'white';
-  ctx.textAlign = 'right';
-  ctx.fillText(`SPD: ${speed}`, W - 12, 24);
-  ctx.fillText(`SPAWN: ${enemies.spawnInterval}`, W - 12, 44);
-  ctx.fillText(`SCORE: ${scoring.score}`, W - 12, 64);
-  ctx.fillText(`${scoring.multiplier}x`, W - 12, 84);
+        ctx.save();
+        ctx.textAlign = 'center';
 
-  //near miss indicator
-  if (renderer.nearMissTimer > 0) {
-renderer.nearMissTimer--;
-  const chain = scoring.nearMissChain;
-  const label = chain >= 8
-    ? `NEAR MISS x${chain}!! +${Math.round(10 * 2 * scoring.multiplier)}`
-    : `NEAR MISS x${chain}! +${Math.round(5 * scoring.multiplier)}`;
-  ctx.font = 'bold 22px monospace';
-  ctx.fillStyle = `rgba(255, 220, 0, ${Math.min(1, renderer.nearMissTimer / 40)})`;
-  ctx.textAlign = 'center';
-  ctx.fillText(label, W / 2, 60);
-  }
+        ctx.font = 'bold 52px monospace';
+        ctx.lineWidth = 8;
+        ctx.strokeStyle = `rgba(0, 0, 0, ${textAlpha})`;
+        ctx.strokeText('YOU GOT QUACKED', W/2, H/2 - 60);
+        ctx.fillStyle = `rgba(255, 60, 60, ${textAlpha})`;
+        ctx.fillText('YOU GOT QUACKED', W/2, H/2 - 60);
 
-  ctx.restore();
-},
+        ctx.font = 'bold 24px monospace';
+        ctx.strokeText(`SCORE: ${scoring.score}`, W/2, H/2 + 10);
+        ctx.fillStyle = `rgba(255, 255, 255, ${textAlpha})`;
+        ctx.fillText(`SCORE: ${scoring.score}`, W/2, H/2 + 10);
+
+        ctx.fillText(`TIME: ${timeStr}`, W/2, H/2 + 44);
+        ctx.fillText(`NEAR MISSES: ${scoring.totalNearMisses}`, W/2, H/2 + 78);
+
+        ctx.restore();
+      }
+    },
+        
+    nearMissTimer: 0,
+    drawHUD(ctx) {
+      const speed = Math.sqrt(duck.vx * duck.vx + duck.vy * duck.vy).toFixed(1);
+      const W = ctx.canvas.width;
+      const H = ctx.canvas.height;
+
+      ctx.save();
+      ctx.font = '16px monospace';
+      ctx.fillStyle = 'white';
+      ctx.textAlign = 'right';
+      ctx.fillText(`SPD: ${speed}`, W - 12, 24);
+      ctx.fillText(`SPAWN: ${enemies.spawnInterval}`, W - 12, 44);
+      ctx.fillText(`SCORE: ${scoring.score}`, W - 12, 64);
+      ctx.fillText(`${scoring.multiplier}x`, W - 12, 84);
+      
+      //center score
+      ctx.font = 'bold 24px monospace';
+      ctx.textAlign = 'center';
+      ctx.strokeStyle = 'black';
+      ctx.lineWidth = 4;
+      ctx.strokeText(`SCORE: ${scoring.score}`, W / 2, 30);
+      ctx.fillStyle = 'white';
+      ctx.fillText(`SCORE: ${scoring.score}`, W / 2, 30);
+
+      //near miss indicator, center top
+      if (renderer.nearMissTimer > 0) {
+    renderer.nearMissTimer--;
+      const chain = scoring.nearMissChain;
+      const label = chain >= 8
+        ? `NEAR MISS x${chain}!! +${Math.round(10 * 2 * scoring.multiplier)}`
+        : `NEAR MISS x${chain}! +${Math.round(5 * scoring.multiplier)}`;
+      ctx.font = 'bold 36px monospace';
+      ctx.lineWidth = 6;
+      ctx.strokeStyle = `rgba(0, 0, 0, ${Math.min(1, renderer.nearMissTimer / 40)})`;
+      ctx.textAlign = 'center';
+      ctx.strokeText(label, W / 2, 90);
+      ctx.fillStyle = `rgba(255, 220, 0, ${Math.min(1, renderer.nearMissTimer / 40)})`;
+      ctx.fillText(label, W / 2, 90);
+      }
+
+      ctx.restore();
+    },
 };
