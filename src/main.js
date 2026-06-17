@@ -23,7 +23,17 @@ renderer.init();
 
 function loop() {
     duck.update(mouse, canvas);
-    enemies.update();
+    enemies.update(canvas);
+    const result = collision.check();
+    if (result) {
+        if (result.type === 'hit') {
+            console.log('dead, score:', scoring.score);
+        } else if (result.type === 'nearMiss') {
+            scoring.nearMiss();
+            renderer.nearMissTimer = 100;
+        }
+    }
+    scoring.update();
     renderer.draw(ctx);
     requestAnimationFrame(loop);
 }

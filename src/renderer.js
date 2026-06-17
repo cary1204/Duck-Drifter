@@ -1,5 +1,6 @@
 const renderer = {
     duckImg: null,
+    nearMissTimer: 0,
 
     init() {
         this.duckImg = new Image();
@@ -69,22 +70,40 @@ const renderer = {
     },
 
     draw(ctx) {
-        this.drawBackground(ctx, duck.x, duck.y);
-        enemies.draw(ctx, duck.x, duck.y);
-        this.drawDuck(ctx);
-        this.drawHUD(ctx);
+      this.drawBackground(ctx, duck.x, duck.y);
+      enemies.draw(ctx, duck.x, duck.y);
+      this.drawDuck(ctx);
+      collision.draw(ctx);
+      this.drawHUD(ctx);
     },
 
-    drawHUD(ctx) {
-        const speed = Math.sqrt(duck.vx * duck.vx + duck.vy * duck.vy).toFixed(1);
-        const W = ctx.canvas.width;
-    
-        ctx.save();
-        ctx.imageSmoothingEnabled = false;
-        ctx.font = '16px monospace';
-        ctx.fillStyle = 'white';
-        ctx.textAlign = 'right';
-        ctx.fillText(`Speed: ${speed}`, W - 12, 24);
-        ctx.restore();
-    }
+nearMissTimer: 0,
+drawHUD(ctx) {
+  const speed = Math.sqrt(duck.vx * duck.vx + duck.vy * duck.vy).toFixed(1);
+  const W = ctx.canvas.width;
+
+  ctx.save();
+  ctx.font = '16px monospace';
+  ctx.fillStyle = 'white';
+  ctx.textAlign = 'right';
+  ctx.fillText(`SPD: ${speed}`, W - 12, 24);
+  ctx.fillText(`SPAWN: ${enemies.spawnInterval}`, W - 12, 44);
+  ctx.fillText(`SCORE: ${scoring.score}`, W - 12, 64);
+  ctx.fillText(`${scoring.multiplier}x`, W - 12, 84);
+
+  //near miss indicator
+  if (renderer.nearMissTimer > 0) {
+renderer.nearMissTimer--;
+  const chain = scoring.nearMissChain;
+  const label = chain >= 8
+    ? `NEAR MISS x${chain}!! +${Math.round(10 * 2 * scoring.multiplier)}`
+    : `NEAR MISS x${chain}! +${Math.round(5 * scoring.multiplier)}`;
+  ctx.font = 'bold 22px monospace';
+  ctx.fillStyle = `rgba(255, 220, 0, ${Math.min(1, renderer.nearMissTimer / 40)})`;
+  ctx.textAlign = 'center';
+  ctx.fillText(label, W / 2, 60);
+  }
+
+  ctx.restore();
+},
 };

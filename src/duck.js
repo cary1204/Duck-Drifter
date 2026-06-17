@@ -7,7 +7,7 @@ const duck = {
     heading: 0,      // vel angel
     maxSpeed: 8,
     accel: 0.12,     //logistic curve
-    turnRate: 0.02,  //low = overshoot
+    turnRate: 0.025,  //low = overshoot
     drag: 0.995,
 
     update(mouse, canvas) {
