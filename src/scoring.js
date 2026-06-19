@@ -1,5 +1,6 @@
 const scoring = {
     score: 0,
+    highScore: parseInt(localStorage.getItem('quakers_highscore') || '0'),
     multiplier: 1,
     timer: 0,
     nearMissChain: 0,
@@ -45,5 +46,12 @@ const scoring = {
         this.nearMissChainTimer = 0;
         this.totalNearMisses = 0;
         this.survivalFrames = 0;
-    }
+    },
+
+    checkHighScore() {
+        if (this.score > this.highScore) {
+            this.highScore = this.score;
+            localStorage.setItem('quakers_highscore', this.highScore);
+        }
+    },
 };

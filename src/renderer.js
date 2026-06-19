@@ -73,9 +73,9 @@ const renderer = {
 
     draw(ctx) {
       this.drawBackground(ctx, duck.x, duck.y);
-      enemies.draw(ctx, duck.x, duck.y);
+      if (state !== 'title') enemies.draw(ctx, duck.x, duck.y);
       if (state !== 'title') this.drawDuck(ctx);
-      collision.draw(ctx);
+      if (state !== 'title') collision.draw(ctx);
       if (state !== 'title') this.drawHUD(ctx);
     },
 
@@ -112,14 +112,30 @@ const renderer = {
         ctx.fillStyle = `rgba(255, 255, 255, ${textAlpha})`;
         ctx.fillText(`SCORE: ${scoring.score}`, W/2, H/2 + 10);
 
-        ctx.strokeText(`TIME: ${timeStr}`, W/2, H/2 + 44);
-        ctx.fillText(`TIME: ${timeStr}`, W/2, H/2 + 44);
-        ctx.strokeText(`NEAR MISSES: ${scoring.totalNearMisses}`, W/2, H/2 + 78);
-        ctx.fillText(`NEAR MISSES: ${scoring.totalNearMisses}`, W/2, H/2 + 78);
+        ctx.strokeText(`BEST: ${scoring.highScore}`, W/2, H/2 + 44);
+        ctx.fillText(`BEST: ${scoring.highScore}`, W/2, H/2 + 44)
 
-        ctx.fillText(`Press to restart`, W/2, H/2 + 130);
+
+        ctx.strokeText(`TIME: ${timeStr}`, W/2, H/2 + 78);
+        ctx.fillText(`TIME: ${timeStr}`, W/2, H/2 + 78);
+
+        ctx.strokeText(`NEAR MISSES: ${scoring.totalNearMisses}`, W/2, H/2 + 112);
+        ctx.fillText(`NEAR MISSES: ${scoring.totalNearMisses}`, W/2, H/2 + 112);
+
+        ctx.fillText(`Press to restart`, W/2, H/2 + 158);
 
         ctx.restore();
+      }
+      if (progress > 0.5) {
+        const bw = 260, bh = 44;
+        const bx = W/2 - bw/2, by = H/2 + 210;
+        ctx.fillStyle = 'white';
+        ctx.fillRect(bx, by, bw, bh);
+        ctx.font = 'bold 20px monospace';
+        ctx.fillStyle = '#1a1a1a';
+        ctx.textAlign = 'center';
+        ctx.fillText('RETURN TO TITLE', W/2, by + 30);
+
       }
     },
         
@@ -155,6 +171,16 @@ const renderer = {
       ctx.lineWidth = 4;
       ctx.strokeText('By cary1204 & fish', W/2, H/2 - 30);
       ctx.fillText('By cary1204 & fish', W/2, H/2 - 30);
+
+      if (scoring.highScore > 0) {
+        ctx.font = 'bold 20px monospace';
+        ctx.fillStyle = '#f4c842';
+        ctx.strokeStyle = '#80400B';
+        ctx.lineWidth = 4;
+        ctx.strokeText(`BEST: ${scoring.highScore}`, W/2, H/2 + 20);
+        ctx.fillText(`BEST: ${scoring.highScore}`, W/2, H/2 + 20);
+        
+      }
 
       const bw = 220, bh = 48;
       const bx = W/2 - bw/2, by = H/2 + 80;
@@ -205,6 +231,14 @@ const renderer = {
         ctx.fillStyle = `rgba(255, 220, 0, ${Math.min(1, renderer.nearMissTimer / 40)})`;
         ctx.fillText(label, W / 2, 90);
       }
+
+      ctx.textAlign = 'left';
+      ctx.font = 'bold 18px monospace';
+      ctx.lineWidth = 4;
+      ctx.strokeStyle = 'black';
+      ctx.strokeText(`BEST: ${scoring.highScore}`, 12, 30);
+      ctx.fillStyle = 'white';
+      ctx.fillText(`BEST: ${scoring.highScore}`, 12, 30);
 
       ctx.restore();
     },

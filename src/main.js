@@ -19,6 +19,40 @@ canvas.addEventListener('touchmove', e => {
     mouse.y = e.touches[0].clientY;
 }, { passive: false });
 
+canvas.addEventListener('click', (e) => {
+    const rect = canvas.getBoundingClientRect();
+    const cx = (e.clientX - rect.left) * (canvas.width / rect.width);
+    const cy = (e.clientY - rect.top) * (canvas.height / rect.height);
+
+    if (state === 'title') {
+        state = 'playing';
+    } else if (state === 'dead' && deathProgress > 0.5) {
+        const bw = 260, bh = 44;
+        const bx = canvas.width/2 - bw/2;
+        const by = canvas.height/2 + 210;
+
+    if (cx >= bx && cx <= bx + bw && cy >= by && cy <= by + bh) {
+        duck.x = 0; duck.y = 0; duck.vx = 0; duck.vy = 0;
+        enemies.list = [];
+        enemies.spawnInterval = 120;
+        scoring.reset();
+        deathProgress = 0;
+        titleDucks = [];
+        spawnTitleDucks(canvas); // respawn title ducks
+        state = 'title';
+    }
+
+    } else {
+        duck.x = 0; duck.y = 0; duck.vx = 0; duck.vy = 0;
+        enemies.list = [];
+        enemies.spawnInterval = 120;
+        scoring.reset();
+        deathProgress = 0;
+        state = 'playing';
+    }
+    }
+);
+
 renderer.init();
 
 let state = 'title'; //title, playing, dead
@@ -91,6 +125,7 @@ function loop() {
         }
         }
         scoring.update();
+        scoring.checkHighScore();
     } else if (state === 'dead') {
         deathProgress = Math.min(1, deathProgress + 0.01);
     }
