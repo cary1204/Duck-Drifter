@@ -5,7 +5,6 @@ const enemies = {
   spawn(canvas) {
     const W = canvas.width;
     const H = canvas.height;
-    // predict
     const futureX = duck.x + duck.vx * 180;
     const futureY = duck.y + duck.vy * 180;
     //spawn
@@ -52,7 +51,6 @@ const enemies = {
     if (this.spawnTimer >= this.spawnInterval) {
       this.spawnTimer = 0;
       this.spawn(canvas);
-      // more and more ducks
       this.spawnInterval = Math.max(40, this.spawnInterval - 1);
     }
 
@@ -65,7 +63,6 @@ const enemies = {
     const despawnMargin = 600;
     for (let i = this.list.length - 1; i >= 0; i--) {
       const e = this.list[i];
-      // random dir wobble
       e.wobbleTimer++;
       if (e.wobbleTimer > 50 + Math.random() * 40) {
         e.wobbleTimer = 0;
