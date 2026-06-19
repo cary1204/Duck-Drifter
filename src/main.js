@@ -38,17 +38,18 @@ canvas.addEventListener('click', (e) => {
         scoring.reset();
         deathProgress = 0;
         titleDucks = [];
-        spawnTitleDucks(canvas);
+        spawnTitleDucks(canvas); 
         state = 'title';
     }
-
-    } else {
-        duck.x = 0; duck.y = 0; duck.vx = 0; duck.vy = 0;
-        enemies.list = [];
-        enemies.spawnInterval = 120;
-        scoring.reset();
-        deathProgress = 0;
-        state = 'playing';
+    
+    else {
+            duck.x = 0; duck.y = 0; duck.vx = 0; duck.vy = 0;
+            enemies.list = [];
+            enemies.spawnInterval = 120;
+            scoring.reset();
+            deathProgress = 0;
+            state = 'playing';
+        }
     }
     }
 );
@@ -136,4 +137,18 @@ function loop() {
 
     requestAnimationFrame(loop);
     }
+
+//     canvas.addEventListener('click', () => {
+//     if (state === 'title') {
+//         state = 'playing';
+//     } else if (state === 'dead' && deathProgress > 0.8) {
+//         duck.x = 0; duck.y = 0; duck.vx = 0; duck.vy = 0;
+//         enemies.list = [];
+//         enemies.spawnInterval = 120;
+//         scoring.reset();
+//         deathProgress = 0;
+//         state = 'playing';
+//     }
+// });
+
 loop();
