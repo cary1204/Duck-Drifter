@@ -5,4 +5,4 @@ Glide your duck to avoid other ducks;
 single player for now, multiplayer later(or not :P);
 //
 //
-Work in progress.//not playable
+Demo: https://cary1204.github.io/Duck-Drifter/
