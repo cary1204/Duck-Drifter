@@ -7,6 +7,8 @@ const renderer = {
         this.duckImg.src = 'assets/duck.png';
         this.bgImg = new Image();
         this.bgImg.src = 'assets/BG.png';
+        this.titleImg = new Image();
+        this.titleImg.src = 'assets/title.png';
     },
 
 
@@ -72,9 +74,9 @@ const renderer = {
     draw(ctx) {
       this.drawBackground(ctx, duck.x, duck.y);
       enemies.draw(ctx, duck.x, duck.y);
-      this.drawDuck(ctx);
+      if (state !== 'title') this.drawDuck(ctx);
       collision.draw(ctx);
-      this.drawHUD(ctx);
+      if (state !== 'title') this.drawHUD(ctx);
     },
 
     drawDeath(ctx, progress) {
@@ -110,14 +112,61 @@ const renderer = {
         ctx.fillStyle = `rgba(255, 255, 255, ${textAlpha})`;
         ctx.fillText(`SCORE: ${scoring.score}`, W/2, H/2 + 10);
 
+        ctx.strokeText(`TIME: ${timeStr}`, W/2, H/2 + 44);
         ctx.fillText(`TIME: ${timeStr}`, W/2, H/2 + 44);
+        ctx.strokeText(`NEAR MISSES: ${scoring.totalNearMisses}`, W/2, H/2 + 78);
         ctx.fillText(`NEAR MISSES: ${scoring.totalNearMisses}`, W/2, H/2 + 78);
+
+        ctx.fillText(`Press to restart`, W/2, H/2 + 130);
 
         ctx.restore();
       }
     },
         
     nearMissTimer: 0,
+    drawTitle(ctx) {
+      const W = ctx.canvas.width;
+      const H = ctx.canvas.height;
+    
+      for (const d of titleDucks) {
+        ctx.save();
+        ctx.translate(Math.round(d.x), Math.round(d.y));
+        ctx.rotate(d.angle);
+        ctx.imageSmoothingEnabled = false;
+        ctx.drawImage(this.duckImg, -32, -32, 64, 64);
+        ctx.restore();
+      }
+    
+      ctx.save();
+      ctx.textAlign = 'center';
+    
+      ctx.imageSmoothingEnabled = false;
+      if (this.titleImg && this.titleImg.complete) {
+        const tw = this.titleImg.width * 4;
+        const th = this.titleImg.height * 4;
+        ctx.drawImage(this.titleImg, W/2 - tw/2, H/2 - th - 40, tw, th);
+      }
+
+
+      ctx.font = '18px monospace';
+      ctx.textAlign = 'center';
+      ctx.strokeStyle = 'black';
+      ctx.fillStyle = 'white';
+      ctx.lineWidth = 4;
+      ctx.strokeText('By cary1204 & fish', W/2, H/2 - 30);
+      ctx.fillText('By cary1204 & fish', W/2, H/2 - 30);
+
+      const bw = 220, bh = 48;
+      const bx = W/2 - bw/2, by = H/2 + 80;
+      ctx.fillStyle = '#f4c842';
+      ctx.fillRect(bx, by, bw, bh);
+      ctx.font = 'bold 22px monospace';
+      ctx.fillStyle = '#1a1a1a';
+      ctx.fillText('PLAY', W/2, by + 32);
+    
+      ctx.restore();
+    },
+
     drawHUD(ctx) {
       const speed = Math.sqrt(duck.vx * duck.vx + duck.vy * duck.vy).toFixed(1);
       const W = ctx.canvas.width;
@@ -143,18 +192,18 @@ const renderer = {
 
       //near miss indicator, center top
       if (renderer.nearMissTimer > 0) {
-    renderer.nearMissTimer--;
-      const chain = scoring.nearMissChain;
-      const label = chain >= 8
-        ? `NEAR MISS x${chain}!! +${Math.round(10 * 2 * scoring.multiplier)}`
-        : `NEAR MISS x${chain}! +${Math.round(5 * scoring.multiplier)}`;
-      ctx.font = 'bold 36px monospace';
-      ctx.lineWidth = 6;
-      ctx.strokeStyle = `rgba(0, 0, 0, ${Math.min(1, renderer.nearMissTimer / 40)})`;
-      ctx.textAlign = 'center';
-      ctx.strokeText(label, W / 2, 90);
-      ctx.fillStyle = `rgba(255, 220, 0, ${Math.min(1, renderer.nearMissTimer / 40)})`;
-      ctx.fillText(label, W / 2, 90);
+        renderer.nearMissTimer--;
+        const chain = scoring.nearMissChain;
+        const label = chain >= 8
+          ? `NEAR MISS x${chain}!! +${Math.round(10 * 2 * scoring.multiplier)}`
+          : `NEAR MISS x${chain}! +${Math.round(5 * scoring.multiplier)}`;
+        ctx.font = 'bold 36px monospace';
+        ctx.lineWidth = 6;
+        ctx.strokeStyle = `rgba(0, 0, 0, ${Math.min(1, renderer.nearMissTimer / 40)})`;
+        ctx.textAlign = 'center';
+        ctx.strokeText(label, W / 2, 90);
+        ctx.fillStyle = `rgba(255, 220, 0, ${Math.min(1, renderer.nearMissTimer / 40)})`;
+        ctx.fillText(label, W / 2, 90);
       }
 
       ctx.restore();

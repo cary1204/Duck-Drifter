@@ -21,31 +21,98 @@ canvas.addEventListener('touchmove', e => {
 
 renderer.init();
 
-let dead = false;
+let state = 'title'; //title, playing, dead
 let deathProgress = 0;
+let titleDucks = [];
+
+function spawnTitleDucks(canvas) {
+    for (let i = 0; i < 8; i++) {
+        titleDucks.push({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        vx: (Math.random() - 0.5) * 2,
+        vy: (Math.random() - 0.5) * 2,
+        angle: Math.random() * Math.PI * 2,
+        heading: Math.random() * Math.PI * 2,
+        wobbleTimer: 0,
+        wobbleX: 0,
+        wobbleY: 0,
+        });
+    }
+}
+
+function updateTitleDucks(canvas) {
+    const W = canvas.width;
+    const H = canvas.height;
+    for (const d of titleDucks) {
+        d.wobbleTimer++;
+        if (d.wobbleTimer > 50 + Math.random() * 60) {
+        d.wobbleTimer = 0;
+        const a = Math.random() * Math.PI * 2;
+        d.wobbleX = Math.cos(a) * 0.4;
+        d.wobbleY = Math.sin(a) * 0.4;
+        }
+        d.vx += d.wobbleX * 0.05;
+        d.vy += d.wobbleY * 0.05;
+        const speed = Math.sqrt(d.vx * d.vx + d.vy * d.vy);
+        if (speed > 2) { d.vx = (d.vx/speed)*2; d.vy = (d.vy/speed)*2; }
+        d.x += d.vx;
+        d.y += d.vy;
+        if (d.x < -32) d.x = W + 32;
+        if (d.x > W + 32) d.x = -32;
+        if (d.y < -32) d.y = H + 32;
+        if (d.y > H + 32) d.y = -32;
+        if (speed > 0.1) d.heading = Math.atan2(d.vy, d.vx);
+        let diff = d.heading - d.angle;
+        while (diff > Math.PI) diff -= Math.PI * 2;
+        while (diff < -Math.PI) diff += Math.PI * 2;
+        d.angle += diff * 0.08;
+    }
+}
+
+spawnTitleDucks(canvas)
 
 function loop() {
-    if (!dead) {
+    if (state === 'title') {
+        updateTitleDucks(canvas);
+    }
+
+    if (state === 'playing') {
         duck.update(mouse, canvas);
         enemies.update(canvas);
 
         const result = collision.check();
         if (result) {
         if (result.type === 'hit') {
-            dead = true;
+            state = 'dead';
         } else if (result.type === 'nearMiss') {
             scoring.nearMiss();
             renderer.nearMissTimer = 90;
         }
         }
         scoring.update();
-    } else {
-        deathProgress = Math.min(1, deathProgress + 0.008);
+    } else if (state === 'dead') {
+        deathProgress = Math.min(1, deathProgress + 0.01);
     }
 
     renderer.draw(ctx);
-    if (dead) renderer.drawDeath(ctx, deathProgress);
+    if (state === 'dead') renderer.drawDeath(ctx, deathProgress);
+    if (state === 'title') renderer.drawTitle(ctx);
+
     requestAnimationFrame(loop);
-}
+    }
+
+    canvas.addEventListener('click', () => {
+    if (state === 'title') {
+        state = 'playing';
+    } else if (state === 'dead' && deathProgress > 0.8) {
+        duck.x = 0; duck.y = 0; duck.vx = 0; duck.vy = 0;
+        enemies.list = [];
+        enemies.spawnInterval = 120;
+        scoring.reset();
+        deathProgress = 0;
+        state = 'playing';
+    }
+});
 
 loop();
