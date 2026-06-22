@@ -1,7 +1,7 @@
 const enemies = {
   list: [],
   spawnTimer: 0,
-  spawnInterval: 120,
+  spawnInterval: 60,
   spawn(canvas) {
     const W = canvas.width;
     const H = canvas.height;
@@ -32,7 +32,7 @@ const enemies = {
     //bad ducks
     const baseAngle = Math.random() * Math.PI * 2;
     const baseSpeed = 1.5 + Math.random() * 1.5;
-    const homingBase = 0.005;
+    const homingBase = 0.008;
     this.list.push({
       x: spawnWorldX,
       y: spawnWorldY,
@@ -44,7 +44,7 @@ const enemies = {
       wobbleX: 0,
       wobbleY: 0,
       // go to plr
-      homingStrength: homingBase + Math.random() * 0.007,
+      homingStrength: homingBase + Math.random() * 0.008,
 
     }); 
   },
@@ -53,13 +53,15 @@ const enemies = {
     if (this.spawnTimer >= this.spawnInterval) {
       this.spawnTimer = 0;
       this.spawn(canvas);
-      this.spawnInterval = Math.max(40, this.spawnInterval - 1);
+      this.spawn(canvas);
+      this.spawn(canvas);
+      this.spawnInterval = Math.max(30, this.spawnInterval - 2);
     }
 
     // bonus spawns at high speed
     const duckSpeed = Math.sqrt(duck.vx * duck.vx + duck.vy * duck.vy);
-    if (duckSpeed > 5.5 && Math.random() > 0.95) this.spawn(canvas);
-    if (duckSpeed > 5.8 && Math.random() > 0.92) this.spawn(canvas);
+    if (duckSpeed > 8 && Math.random() > 0.95) this.spawn(canvas);
+    if (duckSpeed > 10 && Math.random() > 0.92) this.spawn(canvas);
 
     const W = canvas.width;
     const H = canvas.height;
@@ -85,7 +87,7 @@ const enemies = {
       e.vy += e.wobbleY * 0.05;
       // speed cap
       const speed = Math.sqrt(e.vx * e.vx + e.vy * e.vy);
-      const maxSpeed = 4.5;
+      const maxSpeed = 12;
       if (speed > maxSpeed) {
         e.vx = (e.vx / speed) * maxSpeed;
         e.vy = (e.vy / speed) * maxSpeed;

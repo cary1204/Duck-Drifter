@@ -1,9 +1,9 @@
 const canvas = document.getElementById('canvas');
-const ctx = canvas.getContext('2d');
+const ctx = canvas.getContext('2d', { alpha: false });
 
-//canvas
-canvas.width = Math.floor(window.innerWidth / 2) * 2;
-canvas.height = Math.floor(window.innerHeight / 2) * 2;
+//canvas - cap res for slow devices
+canvas.width =(Math.floor(window.innerWidth / 2) * 2);
+canvas.height =(Math.floor(window.innerHeight / 2) * 2);
 
 const mouse = { x: canvas.width / 2, y: canvas.height / 2 };
 
@@ -29,20 +29,18 @@ canvas.addEventListener('click', (e) => {
     } else if (state === 'dead' && deathProgress >= 0.5) {
         const bw = 260, bh = 44;
         const bx = canvas.width/2 - bw/2;
-        const by = canvas.height/2 + 210 ;
+        const by = canvas.height/2 + 210;
 
-    if (cx >= bx && cx <= bx + bw && cy >= by && cy <= by + bh) {
-        duck.x = 0; duck.y = 0; duck.vx = 0; duck.vy = 0;
-        enemies.list = [];
-        enemies.spawnInterval = 120;
-        scoring.reset();
-        deathProgress = 0;
-        titleDucks = [];
-        spawnTitleDucks(canvas); 
-        state = 'title';
-    }
-    
-    else {
+        if (cx >= bx && cx <= bx + bw && cy >= by && cy <= by + bh) {
+            duck.x = 0; duck.y = 0; duck.vx = 0; duck.vy = 0;
+            enemies.list = [];
+            enemies.spawnInterval = 120;
+            scoring.reset();
+            deathProgress = 0;
+            titleDucks = [];
+            spawnTitleDucks(canvas);
+            state = 'title';
+        } else {
             duck.x = 0; duck.y = 0; duck.vx = 0; duck.vy = 0;
             enemies.list = [];
             enemies.spawnInterval = 120;
@@ -51,8 +49,7 @@ canvas.addEventListener('click', (e) => {
             state = 'playing';
         }
     }
-    }
-);
+});
 
 renderer.init();
 
@@ -61,17 +58,17 @@ let deathProgress = 0;
 let titleDucks = [];
 
 function spawnTitleDucks(canvas) {
-    for (let i = 0; i < 8; i++) {
+    for (let i = 0; i < 20; i++) {
         titleDucks.push({
-        x: Math.random() * canvas.width,
-        y: Math.random() * canvas.height,
-        vx: (Math.random() - 0.5) * 2,
-        vy: (Math.random() - 0.5) * 2,
-        angle: Math.random() * Math.PI * 2,
-        heading: Math.random() * Math.PI * 2,
-        wobbleTimer: 0,
-        wobbleX: 0,
-        wobbleY: 0,
+            x: Math.random() * canvas.width,
+            y: Math.random() * canvas.height,
+            vx: (Math.random() - 0.5) * 2,
+            vy: (Math.random() - 0.5) * 2,
+            angle: Math.random() * Math.PI * 2,
+            heading: Math.random() * Math.PI * 2,
+            wobbleTimer: 0,
+            wobbleX: 0,
+            wobbleY: 0,
         });
     }
 }
@@ -82,10 +79,10 @@ function updateTitleDucks(canvas) {
     for (const d of titleDucks) {
         d.wobbleTimer++;
         if (d.wobbleTimer > 50 + Math.random() * 60) {
-        d.wobbleTimer = 0;
-        const a = Math.random() * Math.PI * 2;
-        d.wobbleX = Math.cos(a) * 0.4;
-        d.wobbleY = Math.sin(a) * 0.4;
+            d.wobbleTimer = 0;
+            const a = Math.random() * Math.PI * 2;
+            d.wobbleX = Math.cos(a) * 0.4;
+            d.wobbleY = Math.sin(a) * 0.4;
         }
         d.vx += d.wobbleX * 0.05;
         d.vy += d.wobbleY * 0.05;
@@ -105,9 +102,17 @@ function updateTitleDucks(canvas) {
     }
 }
 
-spawnTitleDucks(canvas)
+spawnTitleDucks(canvas);
 
-function loop() {
+// framerate cap
+let last = 0;
+const FRAME_TIME = 1000 / 60;
+
+function loop(ts) {
+    requestAnimationFrame(loop);
+    if (ts - last < FRAME_TIME - 2) return;
+    last = ts;
+
     if (state === 'title') {
         updateTitleDucks(canvas);
     }
@@ -118,37 +123,22 @@ function loop() {
 
         const result = collision.check();
         if (result) {
-        if (result.type === 'hit') {
-            state = 'dead';
-        } else if (result.type === 'nearMiss') {
-            scoring.nearMiss();
-            renderer.nearMissTimer = 90;
-        }
+            if (result.type === 'hit') {
+                state = 'dead';
+            } else if (result.type === 'nearMiss') {
+                scoring.nearMiss();
+                renderer.nearMissTimer = 90;
+            }
         }
         scoring.update();
         scoring.checkHighScore();
     } else if (state === 'dead') {
-        deathProgress = Math.min(1, deathProgress + 0.01);
+        deathProgress = Math.min(1, deathProgress + 0.03);
     }
 
     renderer.draw(ctx);
     if (state === 'dead') renderer.drawDeath(ctx, deathProgress);
     if (state === 'title') renderer.drawTitle(ctx);
+}
 
-    requestAnimationFrame(loop);
-    }
-
-//     canvas.addEventListener('click', () => {
-//     if (state === 'title') {
-//         state = 'playing';
-//     } else if (state === 'dead' && deathProgress > 0.8) {
-//         duck.x = 0; duck.y = 0; duck.vx = 0; duck.vy = 0;
-//         enemies.list = [];
-//         enemies.spawnInterval = 120;
-//         scoring.reset();
-//         deathProgress = 0;
-//         state = 'playing';
-//     }
-// });
-
-loop();
+requestAnimationFrame(loop);

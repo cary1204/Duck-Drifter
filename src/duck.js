@@ -5,10 +5,10 @@ const duck = {
     vy: 0,
     angle: 0,        // visual
     heading: 0,      // vel angel
-    maxSpeed: 8,
-    accel: 0.12,     //logistic curve
-    turnRate: 0.025,  //low = overshoot
-    drag: 0.995,
+    maxSpeed: 16,
+    accel: 0.35,     //logistic curve
+    turnRate: 0.07,  //low = overshoot
+    drag: 0.99,
 
     update(mouse, canvas) {
         const cx = canvas.width / 2;

@@ -25,7 +25,7 @@ const scoring = {
     }
 
         const speed = Math.sqrt(duck.vx * duck.vx + duck.vy * duck.vy);
-        this.multiplier = speed >= 4.7 ? 1.5 : 1;
+        this.multiplier = speed >= 8.5 ? 1.5 : 1;
     },
 
     nearMiss() {

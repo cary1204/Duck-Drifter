@@ -1,168 +1,172 @@
 const renderer = {
-    duckImg: null,
-    nearMissTimer: 0,
+  duckImg: null,
+  bgImg: null,
+  titleImg: null,
+  nearMissTimer: 0,
+  bgCache: null,
+  bgCacheCtx: null,
+  lastBgX: null,
+  lastBgY: null,
 
-    init() {
-        this.duckImg = new Image();
-        this.duckImg.src = 'assets/duck.png';
-        this.bgImg = new Image();
-        this.bgImg.src = 'assets/BG.png';
-        this.titleImg = new Image();
-        this.titleImg.src = 'assets/title.png';
-    },
+  init() {
+      this.duckImg = new Image();
+      this.duckImg.src = 'assets/duck.png';
+      this.bgImg = new Image();
+      this.bgImg.src = 'assets/BG.png';
+      this.titleImg = new Image();
+      this.titleImg.src = 'assets/title.png';
 
+      this.bgCache = document.createElement('canvas');
+      this.bgCache.width = window.innerWidth;
+      this.bgCache.height = window.innerHeight;
+      this.bgCacheCtx = this.bgCache.getContext('2d');
+  },
 
-    drawBackground(ctx, cameraX, cameraY) {
-        const W = ctx.canvas.width;
-        const H = ctx.canvas.height;
+  drawBackground(ctx, cameraX, cameraY) {
+      const W = ctx.canvas.width;
+      const H = ctx.canvas.height;
 
-      // water
-        ctx.fillStyle = '#0496c7';
-        ctx.fillRect(0, 0, W, H);
+      const bgX = Math.round(cameraX);
+      const bgY = Math.round(cameraY);
 
-      // grid
-        const gridSize = 128;
-        const offX = ((-cameraX % gridSize) + gridSize) % gridSize;
-        const offY = ((-cameraY % gridSize) + gridSize) % gridSize;
+      if (bgX !== this.lastBgX || bgY !== this.lastBgY) {
+          this.lastBgX = bgX;
+          this.lastBgY = bgY;
 
-        ctx.strokeStyle = '#ffffff';
-        ctx.lineWidth = 1;
-        for (let x = offX - gridSize; x < W + gridSize; x += gridSize) {
-        ctx.beginPath();
-        ctx.moveTo(x, 0);
-        ctx.lineTo(x, H);
-        ctx.stroke();
-        }
-        for (let y = offY - gridSize; y < H + gridSize; y += gridSize) {
-        ctx.beginPath();
-        ctx.moveTo(0, y);
-        ctx.lineTo(W, y);
-        ctx.stroke();
-        }
-    },
-    // drawBackground(ctx, cameraX, cameraY) {
-    //     const W = ctx.canvas.width;
-    //     const H = ctx.canvas.height;
+          // water
+          this.bgCacheCtx.fillStyle = '#0496c7';
+          this.bgCacheCtx.fillRect(0, 0, W, H);
 
-    //     const offX = ((-cameraX % this.bgImg.width) + this.bgImg.width) % this.bgImg.width;
-    //     const offY = ((-cameraY % this.bgImg.height) + this.bgImg.height) % this.bgImg.height;
+          // grid
+          const gridSize = 128;
+          const offX = ((-bgX % gridSize) + gridSize) % gridSize;
+          const offY = ((-bgY % gridSize) + gridSize) % gridSize;
 
-    //     for (let x = offX - this.bgImg.width; x < W + this.bgImg.width; x += this.bgImg.width) {
-    //         for (let y = offY - this.bgImg.height; y < H + this.bgImg.height; y += this.bgImg.height) {
-    //             ctx.drawImage(this.bgImg, x, y);
-    //         }
-    //     }
-    // },
+          this.bgCacheCtx.strokeStyle = '#ffffff';
+          this.bgCacheCtx.lineWidth = 1;
+          for (let x = offX - gridSize; x < W + gridSize; x += gridSize) {
+              this.bgCacheCtx.beginPath();
+              this.bgCacheCtx.moveTo(x, 0);
+              this.bgCacheCtx.lineTo(x, H);
+              this.bgCacheCtx.stroke();
+          }
+          for (let y = offY - gridSize; y < H + gridSize; y += gridSize) {
+              this.bgCacheCtx.beginPath();
+              this.bgCacheCtx.moveTo(0, y);
+              this.bgCacheCtx.lineTo(W, y);
+              this.bgCacheCtx.stroke();
+          }
+      }
 
-    drawDuck(ctx) {
-        const W = ctx.canvas.width;
-        const H = ctx.canvas.height;
-        const cx = Math.floor(W / 2);
-        const cy = Math.floor(H / 2);
+      ctx.drawImage(this.bgCache, 0, 0);
+  },
+
+  drawDuck(ctx) {
+      const W = ctx.canvas.width;
+      const H = ctx.canvas.height;
+      const cx = Math.floor(W / 2);
+      const cy = Math.floor(H / 2);
       const size = 64; // double size(og:16px)
 
-        ctx.save();
-        ctx.translate(cx, cy);
-        ctx.rotate(duck.angle);
-        ctx.imageSmoothingEnabled = false;
-        if (this.duckImg.complete) {
-        ctx.drawImage(this.duckImg, -size / 2, -size / 2, size, size);
-        }
-        ctx.restore();
-    },
+      ctx.save();
+      ctx.translate(cx, cy);
+      ctx.rotate(duck.angle);
+      ctx.imageSmoothingEnabled = false;
+      if (this.duckImg.complete) {
+          ctx.drawImage(this.duckImg, -size / 2, -size / 2, size, size);
+      }
+      ctx.restore();
+  },
 
-    draw(ctx) {
+  draw(ctx) {
       this.drawBackground(ctx, duck.x, duck.y);
       if (state !== 'title') enemies.draw(ctx, duck.x, duck.y);
       if (state !== 'title') this.drawDuck(ctx);
       if (state !== 'title') collision.draw(ctx);
       if (state !== 'title') this.drawHUD(ctx);
-    },
+  },
 
-    drawDeath(ctx, progress) {
+  drawDeath(ctx, progress) {
       const W = ctx.canvas.width;
       const H = ctx.canvas.height;
-      // vignete
+
+      // vignette
       const gradient = ctx.createRadialGradient(W/2, H/2, H * 0.05, W/2, H/2, H * 0.6);
-      
       gradient.addColorStop(0, `rgba(0, 0, 0, 0)`);
       gradient.addColorStop(0.6, `rgba(80, 0, 0, ${progress * 0.6})`);
       gradient.addColorStop(1, `rgba(0, 0, 0, ${progress * 0.95})`);
       ctx.fillStyle = gradient;
       ctx.fillRect(0, 0, W, H);
-    
+
       if (progress > 0.4) {
-        const textAlpha = (progress - 0.4) / 0.6;
-        const secs = Math.floor(scoring.survivalFrames / 60);
-        const mins = Math.floor(secs / 60);
-        const timeStr = mins > 0 ? `${mins}m ${secs % 60}s` : `${secs}s`;
+          const textAlpha = (progress - 0.4) / 0.6;
+          const secs = Math.floor(scoring.survivalFrames / 60);
+          const mins = Math.floor(secs / 60);
+          const timeStr = mins > 0 ? `${mins}m ${secs % 60}s` : `${secs}s`;
 
-        ctx.save();
-        ctx.textAlign = 'center';
+          ctx.save();
+          ctx.textAlign = 'center';
 
-        ctx.font = 'bold 52px monospace';
-        ctx.lineWidth = 8;
-        ctx.strokeStyle = `rgba(0, 0, 0, ${textAlpha})`;
-        ctx.strokeText('YOU GOT QUACKED', W/2, H/2 - 60);
-        ctx.fillStyle = `rgba(255, 60, 60, ${textAlpha})`;
-        ctx.fillText('YOU GOT QUACKED', W/2, H/2 - 60);
+          ctx.font = 'bold 52px monospace';
+          ctx.lineWidth = 8;
+          ctx.strokeStyle = `rgba(0, 0, 0, ${textAlpha})`;
+          ctx.strokeText('YOU GOT QUACKED', W/2, H/2 - 60);
+          ctx.fillStyle = `rgba(255, 60, 60, ${textAlpha})`;
+          ctx.fillText('YOU GOT QUACKED', W/2, H/2 - 60);
 
-        ctx.font = 'bold 24px monospace';
-        ctx.strokeText(`SCORE: ${scoring.score}`, W/2, H/2 + 10);
-        ctx.fillStyle = `rgba(255, 255, 255, ${textAlpha})`;
-        ctx.fillText(`SCORE: ${scoring.score}`, W/2, H/2 + 10);
+          ctx.font = 'bold 24px monospace';
+          ctx.strokeText(`SCORE: ${scoring.score}`, W/2, H/2 + 10);
+          ctx.fillStyle = `rgba(255, 255, 255, ${textAlpha})`;
+          ctx.fillText(`SCORE: ${scoring.score}`, W/2, H/2 + 10);
 
-        ctx.strokeText(`BEST: ${scoring.highScore}`, W/2, H/2 + 44);
-        ctx.fillText(`BEST: ${scoring.highScore}`, W/2, H/2 + 44)
+          ctx.strokeText(`BEST: ${scoring.highScore}`, W/2, H/2 + 44);
+          ctx.fillText(`BEST: ${scoring.highScore}`, W/2, H/2 + 44);
 
+          ctx.strokeText(`TIME: ${timeStr}`, W/2, H/2 + 78);
+          ctx.fillText(`TIME: ${timeStr}`, W/2, H/2 + 78);
 
-        ctx.strokeText(`TIME: ${timeStr}`, W/2, H/2 + 78);
-        ctx.fillText(`TIME: ${timeStr}`, W/2, H/2 + 78);
+          ctx.strokeText(`NEAR MISSES: ${scoring.totalNearMisses}`, W/2, H/2 + 112);
+          ctx.fillText(`NEAR MISSES: ${scoring.totalNearMisses}`, W/2, H/2 + 112);
 
-        ctx.strokeText(`NEAR MISSES: ${scoring.totalNearMisses}`, W/2, H/2 + 112);
-        ctx.fillText(`NEAR MISSES: ${scoring.totalNearMisses}`, W/2, H/2 + 112);
+          ctx.fillText(`Press to restart`, W/2, H/2 + 158);
 
-        ctx.fillText(`Press to restart`, W/2, H/2 + 158);
-
-        ctx.restore();
+          ctx.restore();
       }
+
       if (progress > 0.5) {
-        const bw = 260, bh = 44;
-        const bx = W/2 - bw/2, by = H/2 + 210;
-        ctx.fillStyle = 'white';
-        ctx.fillRect(bx, by, bw, bh);
-        ctx.font = 'bold 20px monospace';
-        ctx.fillStyle = '#1a1a1a';
-        ctx.textAlign = 'center';
-        ctx.fillText('RETURN TO TITLE', W/2, by + 30);
-
+          const bw = 260, bh = 44;
+          const bx = W/2 - bw/2, by = H/2 + 210;
+          ctx.fillStyle = 'white';
+          ctx.fillRect(bx, by, bw, bh);
+          ctx.font = 'bold 20px monospace';
+          ctx.fillStyle = '#1a1a1a';
+          ctx.textAlign = 'center';
+          ctx.fillText('RETURN TO TITLE', W/2, by + 30);
       }
-    },
-        
-    nearMissTimer: 0,
-    drawTitle(ctx) {
+  },
+
+  drawTitle(ctx) {
       const W = ctx.canvas.width;
       const H = ctx.canvas.height;
-    
+
       for (const d of titleDucks) {
-        ctx.save();
-        ctx.translate(Math.round(d.x), Math.round(d.y));
-        ctx.rotate(d.angle);
-        ctx.imageSmoothingEnabled = false;
-        ctx.drawImage(this.duckImg, -32, -32, 64, 64);
-        ctx.restore();
-      }
-    
-      ctx.save();
-      ctx.textAlign = 'center';
-    
-      ctx.imageSmoothingEnabled = false;
-      if (this.titleImg && this.titleImg.complete) {
-        const tw = this.titleImg.width * 4;
-        const th = this.titleImg.height * 4;
-        ctx.drawImage(this.titleImg, W/2 - tw/2, H/2 - th - 40, tw, th);
+          ctx.save();
+          ctx.translate(Math.round(d.x), Math.round(d.y));
+          ctx.rotate(d.angle);
+          ctx.imageSmoothingEnabled = false;
+          ctx.drawImage(this.duckImg, -32, -32, 64, 64);
+          ctx.restore();
       }
 
+      ctx.save();
+      ctx.textAlign = 'center';
+      ctx.imageSmoothingEnabled = false;
+
+      if (this.titleImg && this.titleImg.complete) {
+          const tw = this.titleImg.width * 4;
+          const th = this.titleImg.height * 4;
+          ctx.drawImage(this.titleImg, W/2 - tw/2, H/2 - th - 40, tw, th);
+      }
 
       ctx.font = '18px monospace';
       ctx.textAlign = 'center';
@@ -173,13 +177,12 @@ const renderer = {
       ctx.fillText('By cary1204 & fish', W/2, H/2 - 30);
 
       if (scoring.highScore > 0) {
-        ctx.font = 'bold 20px monospace';
-        ctx.fillStyle = '#f4c842';
-        ctx.strokeStyle = '#80400B';
-        ctx.lineWidth = 4;
-        ctx.strokeText(`BEST: ${scoring.highScore}`, W/2, H/2 + 20);
-        ctx.fillText(`BEST: ${scoring.highScore}`, W/2, H/2 + 20);
-        
+          ctx.font = 'bold 20px monospace';
+          ctx.fillStyle = '#f4c842';
+          ctx.strokeStyle = '#80400B';
+          ctx.lineWidth = 4;
+          ctx.strokeText(`BEST: ${scoring.highScore}`, W/2, H/2 + 20);
+          ctx.fillText(`BEST: ${scoring.highScore}`, W/2, H/2 + 20);
       }
 
       const bw = 220, bh = 48;
@@ -189,11 +192,11 @@ const renderer = {
       ctx.font = 'bold 22px monospace';
       ctx.fillStyle = '#1a1a1a';
       ctx.fillText('PLAY', W/2, by + 32);
-    
-      ctx.restore();
-    },
 
-    drawHUD(ctx) {
+      ctx.restore();
+  },
+
+  drawHUD(ctx) {
       const speed = Math.sqrt(duck.vx * duck.vx + duck.vy * duck.vy).toFixed(1);
       const W = ctx.canvas.width;
       const H = ctx.canvas.height;
@@ -206,8 +209,8 @@ const renderer = {
       ctx.fillText(`SPAWN: ${enemies.spawnInterval}`, W - 12, 44);
       ctx.fillText(`SCORE: ${scoring.score}`, W - 12, 64);
       ctx.fillText(`${scoring.multiplier}x`, W - 12, 84);
-      
-      //center score
+
+      // center score
       ctx.font = 'bold 24px monospace';
       ctx.textAlign = 'center';
       ctx.strokeStyle = 'black';
@@ -216,20 +219,20 @@ const renderer = {
       ctx.fillStyle = 'white';
       ctx.fillText(`SCORE: ${scoring.score}`, W / 2, 30);
 
-      //near miss indicator, center top
+      // near miss indicator, center top
       if (renderer.nearMissTimer > 0) {
-        renderer.nearMissTimer--;
-        const chain = scoring.nearMissChain;
-        const label = chain >= 8
-          ? `NEAR MISS x${chain}!! +${Math.round(10 * 2 * scoring.multiplier)}`
-          : `NEAR MISS x${chain}! +${Math.round(5 * scoring.multiplier)}`;
-        ctx.font = 'bold 36px monospace';
-        ctx.lineWidth = 6;
-        ctx.strokeStyle = `rgba(0, 0, 0, ${Math.min(1, renderer.nearMissTimer / 40)})`;
-        ctx.textAlign = 'center';
-        ctx.strokeText(label, W / 2, 90);
-        ctx.fillStyle = `rgba(255, 220, 0, ${Math.min(1, renderer.nearMissTimer / 40)})`;
-        ctx.fillText(label, W / 2, 90);
+          renderer.nearMissTimer--;
+          const chain = scoring.nearMissChain;
+          const label = chain >= 8
+              ? `NEAR MISS x${chain}!! +${Math.round(10 * 2 * scoring.multiplier)}`
+              : `NEAR MISS x${chain}! +${Math.round(5 * scoring.multiplier)}`;
+          ctx.font = 'bold 36px monospace';
+          ctx.lineWidth = 6;
+          ctx.strokeStyle = `rgba(0, 0, 0, ${Math.min(1, renderer.nearMissTimer / 40)})`;
+          ctx.textAlign = 'center';
+          ctx.strokeText(label, W / 2, 90);
+          ctx.fillStyle = `rgba(255, 220, 0, ${Math.min(1, renderer.nearMissTimer / 40)})`;
+          ctx.fillText(label, W / 2, 90);
       }
 
       ctx.textAlign = 'left';
@@ -241,5 +244,5 @@ const renderer = {
       ctx.fillText(`BEST: ${scoring.highScore}`, 12, 30);
 
       ctx.restore();
-    },
+  },
 };
