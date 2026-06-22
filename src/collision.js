@@ -2,7 +2,7 @@ const collision = {
     playerRadius: 12,
     enemyRadius: 16,
     nearMissRadius: 80,
-    showHitboxes: true,
+    showHitboxes: false,
 
     check() {
         for (let i = 0; i < enemies.list.length; i++) {
