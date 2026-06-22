@@ -62,8 +62,8 @@ function spawnTitleDucks(canvas) {
         titleDucks.push({
             x: Math.random() * canvas.width,
             y: Math.random() * canvas.height,
-            vx: (Math.random() - 0.5) * 2,
-            vy: (Math.random() - 0.5) * 2,
+            vx: (Math.random() - 0.5) * 5,
+            vy: (Math.random() - 0.5) * 5,
             angle: Math.random() * Math.PI * 2,
             heading: Math.random() * Math.PI * 2,
             wobbleTimer: 0,
@@ -87,7 +87,7 @@ function updateTitleDucks(canvas) {
         d.vx += d.wobbleX * 0.05;
         d.vy += d.wobbleY * 0.05;
         const speed = Math.sqrt(d.vx * d.vx + d.vy * d.vy);
-        if (speed > 2) { d.vx = (d.vx/speed)*2; d.vy = (d.vy/speed)*2; }
+        if (speed > 4) { d.vx = (d.vx/speed)*4; d.vy = (d.vy/speed)*4; }
         d.x += d.vx;
         d.y += d.vy;
         if (d.x < -32) d.x = W + 32;

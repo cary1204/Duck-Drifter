@@ -32,7 +32,7 @@ const enemies = {
     //bad ducks
     const baseAngle = Math.random() * Math.PI * 2;
     const baseSpeed = 1.5 + Math.random() * 1.5;
-    const homingBase = 0.008;
+    const homingBase = 0.01;
     this.list.push({
       x: spawnWorldX,
       y: spawnWorldY,
