@@ -2,7 +2,7 @@ const collision = {
     playerRadius: 12,
     enemyRadius: 16,
     nearMissRadius: 80,
-    showHitboxes: false,
+    showHitboxes: true,
 
     check() {
         for (let i = 0; i < enemies.list.length; i++) {
@@ -60,7 +60,7 @@ const collision = {
             // near miss hitbox
             ctx.beginPath();
             ctx.arc(sx, sy, this.nearMissRadius, 0, Math.PI * 2);
-            ctx.strokeStyle = 'rgba(255, 165, 0, 0.4)';
+            ctx.strokeStyle = 'rgba(253, 237, 7, 0.92)';
             ctx.lineWidth = 1;
             ctx.stroke();
         }

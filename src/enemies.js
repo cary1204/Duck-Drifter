@@ -32,6 +32,7 @@ const enemies = {
     //bad ducks
     const baseAngle = Math.random() * Math.PI * 2;
     const baseSpeed = 1.5 + Math.random() * 1.5;
+    const homingBase = 0.005;
     this.list.push({
       x: spawnWorldX,
       y: spawnWorldY,
@@ -43,8 +44,9 @@ const enemies = {
       wobbleX: 0,
       wobbleY: 0,
       // go to plr
-      homingStrength: 0.004 + Math.random() * 0.007,
-    });
+      homingStrength: homingBase + Math.random() * 0.007,
+
+    }); 
   },
   update(canvas) {
     this.spawnTimer++;
@@ -57,6 +59,7 @@ const enemies = {
     // bonus spawns at high speed
     const duckSpeed = Math.sqrt(duck.vx * duck.vx + duck.vy * duck.vy);
     if (duckSpeed > 5.5 && Math.random() > 0.95) this.spawn(canvas);
+    if (duckSpeed > 5.8 && Math.random() > 0.92) this.spawn(canvas);
 
     const W = canvas.width;
     const H = canvas.height;
