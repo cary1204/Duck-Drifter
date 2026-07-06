@@ -25,7 +25,18 @@ canvas.addEventListener('click', (e) => {
     const cy = (e.clientY - rect.top) * (canvas.height / rect.height);
 
     if (state === 'title') {
-        state = 'playing';
+        if (state === 'title') {
+        const sbw = 220, sbh = 48;
+        const sbx = canvas.width/2 - sbw/2;
+        const sby = canvas.height/2 + 140;
+
+        if (cx >= sbx && cx <= sbx + sbw && cy >= sby && cy <= sby + sbh) {
+            state = 'store';
+        } else {
+            state = 'playing';
+        }
+        }
+
     } else if (state === 'dead' && deathProgress >= 0.5) {
         const bw = 260, bh = 44;
         const bx = canvas.width/2 - bw/2;
@@ -34,27 +45,31 @@ canvas.addEventListener('click', (e) => {
         if (cx >= bx && cx <= bx + bw && cy >= by && cy <= by + bh) {
             duck.x = 0; duck.y = 0; duck.vx = 0; duck.vy = 0;
             enemies.list = [];
-            enemies.spawnInterval = 120;
+            enemies.spawnInterval = 80;
             scoring.reset();
             deathProgress = 0;
             titleDucks = [];
+            coinFinalized = false;
             spawnTitleDucks(canvas);
             state = 'title';
         } else {
             duck.x = 0; duck.y = 0; duck.vx = 0; duck.vy = 0;
             enemies.list = [];
-            enemies.spawnInterval = 120;
+            enemies.spawnInterval = 80;
             scoring.reset();
             deathProgress = 0;
+            coinFinalized = false;
             state = 'playing';
         }
     }
 });
 
 renderer.init();
+coin.init();
 
 let state = 'title'; //title, playing, dead
 let deathProgress = 0;
+let coinFinalized = false;
 let titleDucks = [];
 
 function spawnTitleDucks(canvas) {
@@ -120,11 +135,15 @@ function loop(ts) {
     if (state === 'playing') {
         duck.update(mouse, canvas);
         enemies.update(canvas);
+        coin.update();
 
         const result = collision.check();
         if (result) {
             if (result.type === 'hit') {
                 state = 'dead';
+                scoring.finalizeCoins();
+                coinFinalized = true;
+                renderer.startShake(20, 24);
             } else if (result.type === 'nearMiss') {
                 scoring.nearMiss();
                 renderer.nearMissTimer = 90;

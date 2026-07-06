@@ -1,7 +1,7 @@
 const enemies = {
   list: [],
   spawnTimer: 0,
-  spawnInterval: 60,
+  spawnInterval: 80,
   spawn(canvas) {
     const W = canvas.width;
     const H = canvas.height;

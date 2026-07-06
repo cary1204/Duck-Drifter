@@ -1,6 +1,8 @@
 const scoring = {
     score: 0,
     highScore: parseInt(localStorage.getItem('quakers_highscore') || '0'),
+    totalCoins: parseInt(localStorage.getItem('quakers_coins') || '0'),
+    runCoins: 0,
     multiplier: 1,
     timer: 0,
     nearMissChain: 0,
@@ -38,6 +40,21 @@ const scoring = {
         this.score += Math.round(base * chainBonus * this.multiplier);
     },
 
+    addCoin(amount) {
+        this.runCoins += amount;
+    },
+
+    finalizeCoins() {
+        if (this.coinsFinalized) return;
+        this.coinsFinalized = true;
+        const bonus = Math.floor(this.score / 60);
+        const total = this.runCoins + bonus;
+        this.totalCoins += total;
+        localStorage.setItem('quakers_coins', this.totalCoins);
+        return { bonus, runCoins: this.runCoins, total };
+    },
+
+
     reset() {
         this.score = 0;
         this.multiplier = 1;
@@ -46,6 +63,8 @@ const scoring = {
         this.nearMissChainTimer = 0;
         this.totalNearMisses = 0;
         this.survivalFrames = 0;
+        this.runCoins = 0;
+        this.coinsFinalized = false;
     },
 
     checkHighScore() {

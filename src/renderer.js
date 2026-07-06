@@ -7,6 +7,8 @@ const renderer = {
   bgCacheCtx: null,
   lastBgX: null,
   lastBgY: null,
+  shakeDuration: 0,
+  shakeMagnitude: 0,
 
   init() {
       this.duckImg = new Image();
@@ -20,6 +22,11 @@ const renderer = {
       this.bgCache.width = window.innerWidth;
       this.bgCache.height = window.innerHeight;
       this.bgCacheCtx = this.bgCache.getContext('2d');
+  },
+
+  startShake(duration, magnitude) {
+      this.shakeDuration = duration;
+      this.shakeMagnitude = magnitude;
   },
 
   drawBackground(ctx, cameraX, cameraY) {
@@ -66,7 +73,7 @@ const renderer = {
       const H = ctx.canvas.height;
       const cx = Math.floor(W / 2);
       const cy = Math.floor(H / 2);
-      const size = 64; // double size(og:16px)
+      const size = 64;
 
       ctx.save();
       ctx.translate(cx, cy);
@@ -79,11 +86,21 @@ const renderer = {
   },
 
   draw(ctx) {
+      ctx.save();
+      if (this.shakeDuration > 0) {
+          this.shakeDuration--;
+          const mag = this.shakeMagnitude * (this.shakeDuration / 20);
+          const sx = (Math.random() - 0.5) * mag;
+          const sy = (Math.random() - 0.5) * mag;
+          ctx.translate(sx, sy);
+      }
       this.drawBackground(ctx, duck.x, duck.y);
       if (state !== 'title') enemies.draw(ctx, duck.x, duck.y);
+      if (state !== 'title') coin.draw(ctx, duck.x, duck.y);
       if (state !== 'title') this.drawDuck(ctx);
       if (state !== 'title') collision.draw(ctx);
       if (state !== 'title') this.drawHUD(ctx);
+      ctx.restore();
   },
 
   drawDeath(ctx, progress) {
@@ -128,7 +145,15 @@ const renderer = {
           ctx.strokeText(`NEAR MISSES: ${scoring.totalNearMisses}`, W/2, H/2 + 112);
           ctx.fillText(`NEAR MISSES: ${scoring.totalNearMisses}`, W/2, H/2 + 112);
 
-          ctx.fillText(`Press to restart`, W/2, H/2 + 158);
+          if (coin.img && coin.img.complete) {
+              ctx.imageSmoothingEnabled = false;
+              ctx.drawImage(coin.img, 0, 0, 20, 20, W/2 - 160, H/2 + 128, 30, 30);
+          }
+          ctx.fillText(`+${scoring.runCoins} collected  +${Math.floor(scoring.score / 60)} bonus`, W/2 + 20, H/2 + 150);
+          ctx.fillText(`TOTAL COINS: ${scoring.totalCoins}`, W/2, H/2 + 285);
+
+          ctx.fillStyle = `rgba(199, 199, 199, 0.8)`;
+          ctx.fillText(`---------------- Press to restart ----------------`, W/2, H/2 + 365);
 
           ctx.restore();
       }
@@ -162,20 +187,22 @@ const renderer = {
       ctx.textAlign = 'center';
       ctx.imageSmoothingEnabled = false;
 
+      // title 
       if (this.titleImg && this.titleImg.complete) {
           const tw = this.titleImg.width * 4;
           const th = this.titleImg.height * 4;
           ctx.drawImage(this.titleImg, W/2 - tw/2, H/2 - th - 40, tw, th);
       }
 
+      // credits
       ctx.font = '18px monospace';
-      ctx.textAlign = 'center';
       ctx.strokeStyle = 'black';
       ctx.fillStyle = 'white';
       ctx.lineWidth = 4;
       ctx.strokeText('By cary1204 & fish', W/2, H/2 - 30);
       ctx.fillText('By cary1204 & fish', W/2, H/2 - 30);
 
+      // high score
       if (scoring.highScore > 0) {
           ctx.font = 'bold 20px monospace';
           ctx.fillStyle = '#f4c842';
@@ -185,6 +212,20 @@ const renderer = {
           ctx.fillText(`BEST: ${scoring.highScore}`, W/2, H/2 + 20);
       }
 
+      // coin
+      if (coin.img && coin.img.complete) {
+          ctx.drawImage(coin.img, 0, 0, 20, 20, W/2 - 50, H/2 + 33, 30, 30);
+      }
+      ctx.font = 'bold 20px monospace';
+      ctx.fillStyle = '#f4c842';
+      ctx.strokeStyle = '#80400B';
+      ctx.lineWidth = 4;
+      ctx.textAlign = 'left';
+      ctx.strokeText(`${scoring.totalCoins}`, W/2 - 10, H/2 + 57);
+      ctx.fillText(`${scoring.totalCoins}`, W/2 - 10, H/2 + 57);
+      ctx.textAlign = 'center';
+
+      // play 
       const bw = 220, bh = 48;
       const bx = W/2 - bw/2, by = H/2 + 80;
       ctx.fillStyle = '#f4c842';
@@ -192,6 +233,18 @@ const renderer = {
       ctx.font = 'bold 22px monospace';
       ctx.fillStyle = '#1a1a1a';
       ctx.fillText('PLAY', W/2, by + 32);
+
+      // shop 
+      const sbw = 220, sbh = 48;
+      const sbx = W/2 - sbw/2, sby = H/2 + 140;
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(sbx, sby, sbw, sbh);
+      if (coin.img && coin.img.complete) {
+          ctx.drawImage(coin.img, 0, 0, 20, 20, sbx + 14, sby + 9, 30, 30);
+      }
+      ctx.font = 'bold 22px monospace';
+      ctx.fillStyle = '#1a1a1a';
+      ctx.fillText('SHOP', W/2, sby + 32);
 
       ctx.restore();
   },
@@ -210,7 +263,6 @@ const renderer = {
       ctx.fillText(`SCORE: ${scoring.score}`, W - 12, 64);
       ctx.fillText(`${scoring.multiplier}x`, W - 12, 84);
 
-      // center score
       ctx.font = 'bold 24px monospace';
       ctx.textAlign = 'center';
       ctx.strokeStyle = 'black';
@@ -219,7 +271,6 @@ const renderer = {
       ctx.fillStyle = 'white';
       ctx.fillText(`SCORE: ${scoring.score}`, W / 2, 30);
 
-      // near miss indicator, center top
       if (renderer.nearMissTimer > 0) {
           renderer.nearMissTimer--;
           const chain = scoring.nearMissChain;
