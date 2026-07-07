@@ -61,11 +61,18 @@ canvas.addEventListener('click', (e) => {
             coinFinalized = false;
             state = 'playing';
         }
+        } else if (state === 'store') {
+            const rect = canvas.getBoundingClientRect();
+            const cx = (e.clientX - rect.left) * (canvas.width / rect.width);
+            const cy = (e.clientY - rect.top) * (canvas.height / rect.height);
+            shop.handleClick(cx, cy, canvas.width, canvas.height);
+        }
     }
-});
+);
 
-renderer.init();
 coin.init();
+shop.init();
+renderer.init();
 
 let state = 'title'; //title, playing, dead
 let deathProgress = 0;
@@ -154,10 +161,12 @@ function loop(ts) {
     } else if (state === 'dead') {
         deathProgress = Math.min(1, deathProgress + 0.03);
     }
+    
 
     renderer.draw(ctx);
     if (state === 'dead') renderer.drawDeath(ctx, deathProgress);
     if (state === 'title') renderer.drawTitle(ctx);
+    if (state === 'store') shop.draw(ctx);
 }
 
 requestAnimationFrame(loop);

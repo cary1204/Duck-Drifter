@@ -120,7 +120,7 @@ const enemies = {
       ctx.translate(sx, sy);
       ctx.rotate(e.angle);
       ctx.imageSmoothingEnabled = false;
-      ctx.drawImage(renderer.duckImg, -32, -32, 64, 64);
+      ctx.drawImage(renderer.enemyDuckImg, -32, -32, 64, 64);
       ctx.restore();
     }
   }

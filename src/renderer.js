@@ -1,5 +1,6 @@
 const renderer = {
   duckImg: null,
+  enemyDuckImg: null,
   bgImg: null,
   titleImg: null,
   nearMissTimer: 0,
@@ -11,8 +12,14 @@ const renderer = {
   shakeMagnitude: 0,
 
   init() {
+      const duckSkinId = shop.equipped || shop.skins[0].id;
+
+      this.enemyDuckImg = new Image();
+      this.enemyDuckImg.src = 'assets/duck.png';
+      
       this.duckImg = new Image();
-      this.duckImg.src = 'assets/duck.png';
+      this.duckImg.src = shop.imgs?.[duckSkinId]?.src ?? 'assets/duck.png';
+
       this.bgImg = new Image();
       this.bgImg.src = 'assets/BG.png';
       this.titleImg = new Image();
@@ -101,6 +108,13 @@ const renderer = {
       if (state !== 'title') collision.draw(ctx);
       if (state !== 'title') this.drawHUD(ctx);
       ctx.restore();
+      this.drawBackground(ctx, duck.x, duck.y);
+      if (state !== 'title' && state !== 'store') enemies.draw(ctx, duck.x, duck.y);
+      if (state !== 'title' && state !== 'store') coin.draw(ctx, duck.x, duck.y);
+      if (state !== 'title' && state !== 'store') this.drawDuck(ctx);
+      if (state !== 'title' && state !== 'store') collision.draw(ctx);
+      if (state !== 'title' && state !== 'store') this.drawHUD(ctx);
+      ctx.restore();
   },
 
   drawDeath(ctx, progress) {
@@ -179,7 +193,7 @@ const renderer = {
           ctx.translate(Math.round(d.x), Math.round(d.y));
           ctx.rotate(d.angle);
           ctx.imageSmoothingEnabled = false;
-          ctx.drawImage(this.duckImg, -32, -32, 64, 64);
+          ctx.drawImage(this.enemyDuckImg, -32, -32, 64, 64);
           ctx.restore();
       }
 
