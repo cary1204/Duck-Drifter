@@ -1,10 +1,10 @@
 const shop = {
     skins: [
         { id: 'default', name: 'Duck',    price: 0,   src: 'assets/duck.png' },
-        { id: 'skin2',   name: 'White',   price: 200, src: 'assets/skins/skin2.png' },
-        { id: 'skin3',   name: '???',     price: 200, src: 'assets/skins/skin3.png' },
-        { id: 'skin4',   name: '???',     price: 350, src: 'assets/skins/skin4.png' },
-        { id: 'skin5',   name: '???',     price: 500, src: 'assets/skins/skin5.png' },
+        { id: 'skin2',   name: 'White',   price: 10, src: 'assets/skins/skin2.png' },
+        { id: 'skin3',   name: '???',     price: 25, src: 'assets/skins/skin3.png' },
+        { id: 'skin4',   name: 'Goose',     price: 40, src: 'assets/skins/goose.png' },
+        { id: 'skin5',   name: 'Pigeon',     price: 60, src: 'assets/skins/pigeon.png' },
     ],
 
     owned: JSON.parse(localStorage.getItem('quakers_owned') || '["default"]'),

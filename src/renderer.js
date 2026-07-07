@@ -118,7 +118,7 @@ const renderer = {
   },
 
   drawDeath(ctx, progress) {
-      const W = ctx.canvas.width;
+      const W = ctx.canvas.width;   
       const H = ctx.canvas.height;
 
       // vignette
